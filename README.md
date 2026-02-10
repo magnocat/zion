@@ -42,7 +42,7 @@ This case study showcases the dashboard's ability to identify a high-risk networ
 
 ---
 
-## 1. Key Features
+## Key Features
 
 - **Recursive Triple-Check**  
   Simultaneous analysis of:
@@ -235,6 +235,39 @@ Once the service is running, open your browser and go to:
 `http://localhost:8080` or `http://your-server-ip:8080`
 
 --- 
+
+### 4. Understanding IP Discrepancies: Geo-DNS, CDNs & Threat Intelligence
+When investigating a domain, you might notice that a local nslookup returns a different IP address than services like AbuseIPDB. This isn't an error; it's a reflection of how the modern internet works.
+
+- **The Role of Geo-DNS and CDNs**:
+Major service providers (e.g., Google, Microsoft, Cloudflare) operate through thousands of servers worldwide known as Edge Nodes.
+
+- **Local Resolution**: When you run nslookup on your machine, the DNS resolves to the IP of the server closest to you to ensure the lowest possible latency.
+- **Threat Intel Services (e.g., AbuseIPDB)**: These platforms often perform resolutions from servers located in different regions (typically the US or Europe) or display the infrastructure's primary origin IP rather than your local edge node.
+
+- **Practical Example (Real-World Scenario)**:
+Imagine you are investigating a suspicious domain, such as cdn-malicious.com.
+
+- **On your local terminal (e.g., Brazil)**:
+`nslookup cdn-malicious.com`
+`Output: 189.x.x.x (A CDN node IP located in São Paulo)`
+
+- **On AbuseIPDB (Global Query)**:
+When searching the same domain, it might list:
+`IP: 104.x.x.x (A Cloudflare main network IP in the US).`
+
+The Difference: AbuseIPDB is showing you the "owner" of the IP block or the specific IP detected by their crawlers from a different geographical location.
+
+- **Why is this critical for Threat Hunting**?
+You must be aware of two key phenomena:
+
+- **Fast Flux DNS**:
+Attackers frequently change the IP address associated with a domain (every few minutes) to evade detection. What you see in nslookup now might differ from what was indexed 10 minutes ago.
+
+- **Domain Fronting**:
+Attackers may use a legitimate CDN domain to camouflage malicious traffic. Your local nslookup will show a legitimate CDN IP, while Threat Intel might be flagging the historical malicious behavior of that specific infrastructure in another region.
+
+---
 
 *The project is still in its early stages, but it brings a powerful concept to the table. When you search for an address, it doesn't just look up the target, it performs a triple-check, across the Domain, sub-domain (as www - the most common entry point), and IP. While a more aggressive reconnaissance feature to scan entire infrastructures is on the roadmap, the primary focus right now is to empower SOC teams. ZION provides a broader perspective that is essential for handling alerts, threat hunting, or executing incident responses.*
 
